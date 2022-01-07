@@ -122,6 +122,9 @@ class PinCodeTextField extends StatefulWidget {
   /// work with all form windows
   final Function? onTap;
 
+  /// Show paste dialog
+  final bool showPasteDialog;
+
   /// Configuration for paste dialog. Read more [DialogConfig]
   final DialogConfig? dialogConfig;
 
@@ -225,6 +228,7 @@ class PinCodeTextField extends StatefulWidget {
     this.onSubmitted,
     this.errorAnimationController,
     this.beforeTextPaste,
+    this.showPasteDialog = true,
     this.dialogConfig,
     this.pinTheme = const PinTheme.defaults(),
     this.keyboardAppearance,
@@ -280,6 +284,7 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
   late Animation<Offset> _offsetAnimation;
 
   late Animation<double> _cursorAnimation;
+
   DialogConfig get _dialogConfig => widget.dialogConfig == null
       ? DialogConfig()
       : DialogConfig(
@@ -287,6 +292,7 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
           dialogContent: widget.dialogConfig!.dialogContent,
           dialogTitle: widget.dialogConfig!.dialogTitle,
           negativeText: widget.dialogConfig!.negativeText);
+
   PinTheme get _pinTheme => widget.pinTheme;
 
   Timer? _blinkDebounce;
@@ -779,18 +785,20 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
                   _onFocus();
                 },
                 onLongPress: widget.enabled
-                    ? () async {
-                        var data = await Clipboard.getData("text/plain");
-                        if (data?.text?.isNotEmpty ?? false) {
-                          if (widget.beforeTextPaste != null) {
-                            if (widget.beforeTextPaste!(data!.text)) {
-                              _showPasteDialog(data.text!);
+                    ? widget.showPasteDialog
+                        ? () async {
+                            var data = await Clipboard.getData("text/plain");
+                            if (data?.text?.isNotEmpty ?? false) {
+                              if (widget.beforeTextPaste != null) {
+                                if (widget.beforeTextPaste!(data!.text)) {
+                                  _showPasteDialog(data.text!);
+                                }
+                              } else {
+                                _showPasteDialog(data!.text!);
+                              }
                             }
-                          } else {
-                            _showPasteDialog(data!.text!);
                           }
-                        }
-                      }
+                        : null
                     : null,
                 child: Row(
                   mainAxisAlignment: widget.mainAxisAlignment,
