@@ -882,7 +882,12 @@ class _PinCodeTextFieldState extends State<PinCodeTextField>
   }
 
   void _onFocus() {
-    if (!_focusNode!.hasFocus) {
+    if (_focusNode!.hasFocus &&
+        MediaQuery.of(widget.appContext).viewInsets.bottom == 0) {
+      _focusNode!.unfocus();
+      Future.delayed(
+          const Duration(microseconds: 1), () => _focusNode!.requestFocus());
+    } else {
       _focusNode!.requestFocus();
     }
   }
